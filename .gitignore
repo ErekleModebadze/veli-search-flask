@@ -1,0 +1,10 @@
+### Flask template
+instance/*
+!instance/.gitignore
+.webassets-cache
+.env
+
+.idea/
+
+bm25.json
+products.csv

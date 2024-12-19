@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <form method="GET" action="{{ url_for('search') }}" class="search-form">
+        <input type="text" name="q" class="search-input" placeholder="Search for products..." value="{{ query }}">
+        <button type="submit" class="search-button">Search</button>
+    </form>
+
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-name">{{ product.name_ka }}</div>
+
+                    </div>
+
+                    <div class="rating-container" id="rating-{{ product.id }}">
+                        <button class="rating-circle {{ 'selected' if product.rating == 1 else '' }}"
+                                data-value="1"
+                                onclick="rate('{{ product.id }}', '{{ product.barcode }}', '{{ query }}', 1)">1
+                        </button>
+                        <button class="rating-circle {{ 'selected' if product.rating == 2 else '' }}"
+                                data-value="2"
+                                onclick="rate('{{ product.id }}', '{{ product.barcode }}', '{{ query }}', 2)">2
+                        </button>
+                        <button class="rating-circle {{ 'selected' if product.rating == 3 else '' }}"
+                                data-value="3"
+                                onclick="rate('{{ product.id }}', '{{ product.barcode }}', '{{ query }}', 3)">3
+                        </button>
+                        <button class="rating-circle {{ 'selected' if product.rating == 4 else '' }}"
+                                data-value="4"
+                                onclick="rate('{{ product.id }}', '{{ product.barcode }}', '{{ query }}', 4)">4
+                        </button>
+                        <button class="rating-circle {{ 'selected' if product.rating == 5 else '' }}"
+                                data-value="5"
+                                onclick="rate('{{ product.id }}', '{{ product.barcode }}', '{{ query }}', 5)">5
+                        </button>
+                    </div>
+                    <img class="product-image"
+                         src="https://media.veli.store/media/product/{{ product.barcode }}.jpg"
+                         onerror="this.onerror=null; this.src='https://media.veli.store/media/product/{{ product.barcode }}.png'"
+                         alt="image"/>
+
+                    <div class="product-body">
+                        <div class="product-headline">{{ product.brand_ka }} {{ product.label_ka }}</div>
+                        <span class="product-barcode">{{ product.barcode }}</span>
+                        <div class="product-categories">
+
+
+                            {% for category in product.categories_ka %}
+                                <span class="category-tag">{{ category }}</span>
+                            {% endfor %}
+
+                            {% for category in product.m_categories_ka %}
+                                <span class="category-tag">{{ category }}</span>
+                            {% endfor %}
+                        </div>
+
+                        <div class="product-specs">
+                            {% for spec in product.value_specs_ka %}
+                                <div class="spec-tag">{{ spec }}</div>
+                            {% endfor %}
+                        </div>
+
+                        <div class="product-tags">
+                            {% for tag in product.tags %}
+                                <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="product-footer">
+                        <div>
+                            <div class="product-price-container">
+
+                                <div class="product-price">₾ {{ product.price }}</div>
+                                {% if not product.price == product.start_price %}
+                                    <div class="product-start-price">{{ product.start_price }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="start-price">Score: {{ product.score }}</div>
+                        </div>
+
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% if query %}
+            <p class="no-results">No results found for "{{ query }}".</p>
+        {% endif %}
+    {% endif %}
+    <script>
+        function disableRating(productId) {
+            const ratingContainer = document.getElementById(`rating-${productId}`);
+            ratingContainer.querySelectorAll('.rating-circle').forEach(circle => {
+                circle.disabled = true
+            });
+        }
+
+        function enableRating(productId) {
+            const ratingContainer = document.getElementById(`rating-${productId}`);
+            ratingContainer.querySelectorAll('.rating-circle').forEach(circle => {
+                circle.disabled = false
+            });
+        }
+
+        function rate(productId, barcode, query, score) {
+            const ratingContainer = document.getElementById(`rating-${productId}`);
+            const circles = ratingContainer.querySelectorAll('.rating-circle');
+
+            // Disable rating circles
+            disableRating(productId);
+
+            // Toggle the selected state
+            const selectedCircle = circles[score - 1];
+            const wasSelected = selectedCircle.classList.contains('selected');
+
+            if (wasSelected) {
+                selectedCircle.classList.remove('selected');
+            } else {
+                circles.forEach(c => c.classList.remove('selected'));
+                selectedCircle.classList.add('selected');
+            }
+
+            // Define the fetch options
+            const fetchOptions = {
+                method: wasSelected ? 'DELETE' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: productId,
+                    barcode: barcode,
+                    query: query,
+                    score: score,
+                }),
+            };
+
+            // Submit the rating
+            fetch('/search/rate', fetchOptions)
+                .then(response => response.json())
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting the rating.');
+                    // Revert circle selection if error occurred
+                    selectedCircle.classList.toggle('selected');
+                })
+                .finally(() => {
+                    // Re-enable rating circles
+                    enableRating(productId);
+                });
+        }
+    </script>
+{% endblock %}
