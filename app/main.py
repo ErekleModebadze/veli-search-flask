@@ -63,7 +63,7 @@ def hello_world():
 
 @app.route('/search')
 def search():
-    squery = re.sub(r'\s+', ' ', request.args.get('q', '').strip()).replace("ნაძვისხე", "ნაძვის ხე")
+    squery = re.sub(r'\s+', ' ', request.args.get('q', '').lower().strip()).replace("ნაძვისხე", "ნაძვის ხე")
 
     if not squery:
         return render_template('search.html')
