@@ -1,4 +1,5 @@
 import logging
+import os
 import re
 
 import gdown
@@ -38,6 +39,13 @@ deepinfra = OpenAI(api_key=Config.DEEPINFRA_API_KEY, base_url=Config.DEEPINFRA_H
 
 #
 bm25 = BM25Encoder()
+#
+if not os.path.exists('data'):
+    os.makedirs('data')
+#
+if os.path.exists('data/bm25.json'):
+    os.remove('data/bm25.json')
+
 #
 gdown.download(id=Config.BM25_FILE_ID, output='data/bm25.json', quiet=False)
 #
