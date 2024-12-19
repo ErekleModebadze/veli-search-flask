@@ -2,7 +2,7 @@ from typing import List
 
 from sqlalchemy import ARRAY
 
-from extensions import db
+from app.extensions import db
 
 
 class Product(db.Model):

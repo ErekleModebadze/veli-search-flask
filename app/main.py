@@ -3,7 +3,7 @@ import re
 
 import gdown
 
-from extensions import db
+from app.extensions import db
 from flask import Flask, redirect, render_template, request, jsonify
 
 from openai import OpenAI
@@ -12,11 +12,11 @@ from pinecone import Pinecone
 from pinecone_text.sparse import BM25Encoder
 
 from sqlalchemy import and_
-from models import Rating, Product
+from app.models import Rating, Product
 
-from config import Config
+from app.config import Config
 
-from utils import hybrid_scale
+from app.utils import hybrid_scale
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
@@ -126,7 +126,7 @@ def delete_rating():
             )
         ).delete()
         db.session.commit()
-        
+
         return jsonify({"message": "Rating submitted successfully"}), 200
     except Exception as e:
         logging.error(e)
