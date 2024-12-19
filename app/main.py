@@ -19,6 +19,10 @@ from app.config import Config
 
 from app.utils import hybrid_scale
 
+import nltk
+
+nltk.download('punkt_tab')
+
 app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 app.config.from_object(Config)
